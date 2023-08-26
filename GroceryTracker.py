@@ -1,5 +1,5 @@
 """
-GOAL: Grocery tracker to prevent food from expiring/wasting money.
+GOAL: Grocery tracker to prevent food from expiring/wasting money. Send message to phone saying which food will expire soon.
 require manual input of food items but the program will reference a database and use a standard expiration date for the item but the user can manually change this if it is incorrect.
 the program will keep track of the days and will accumalate the amount of expired food over time if the user does not use the food.
 Standard method: user inputs food items.
@@ -7,6 +7,8 @@ Standard method: user inputs food items.
 """
 import csv
 from datetime import datetime
+import pandas
+from pandas import DataFrame
 
 def currentDate():
     current_date = datetime.now().strftime("%m-%d-%Y")
@@ -21,22 +23,10 @@ def menu():
     print("Option 4: Show food expiring soon")
     print("Option 5: TBD")
 
-def readData(readFile):
-    with open(readFile, "r") as file:
+def readData(fileName):
         # Read data from a file
-        
-        csvreader = csv.reader(file)
-        for row in csvreader:
-            print(row)
-
-def writeData(writeFile, itemInformation):
-    with open(writeFile, "a") as file:
-        # Write data to the file
-        
-        writer = csv.writer(file)
-        writer.writerow(itemInformation)
-
-
+        readFile = pandas.read_csv(fileName)
+        return readFile
 
 
 if __name__ == "__main__":
@@ -51,8 +41,10 @@ if __name__ == "__main__":
         menu()
         menuInput = int(input("Enter a number(1, 2, 3, 4, 5)\n"))
         if menuInput == 1:
+            #Try/catch block for when file is accessed with no data stored
             print(readData(storage_file))
-        elif menuInput == 2:    
+        elif menuInput == 2:
+            counter = 0   
             while quit1 == False:                                   #loop to allow user to input multiple items
                 foodInput = input("Enter the name of the food ")
                 monthInput = input("Enter the month of expiration ")
@@ -62,27 +54,42 @@ if __name__ == "__main__":
                 
                 costOfFood = f"${costOfFood}"                           #formatting cost with $ sign      
                 expirationDate = f"{monthInput}-{dayInput}-{yearInput}"         #Creating expiration date for the food dictionary
-                foodList = [currentdate, foodInput, costOfFood, expirationDate]
+                foodList = [[currentdate, foodInput, costOfFood, expirationDate,]]  #Organizing data for a panda df
                 
-                writeData(storage_file, foodList)                #Writing data to file "GroceryTrackerStorage.csv"
-                writeData(file_name, foodList)                   #Writing data to file "my_food_file.csv"
+                df = pandas.DataFrame(foodList, columns=['Log Date', 'Food Item', 'Cost', 'Exp Date'])  #storing food data in a panda df
                 
-                quit2 = input("To quit enter 'q'. To continue press any key")
+                """if counter == 0:                                                #If its the first input of the day, it creates a new df entry
+                    df.to_csv(file_name,mode='a', index=False)
+                    df.to_csv(storage_file,mode='a', index=False)
+                    counter += 1
+                else:
+                    df.to_csv(file_name, mode='a', header=False, index=False)    #If its not the first input of the day, it adds to the df entry
+                    df.to_csv(storage_file, mode='a', header=False, index=False) """  
+
+                df.to_csv(file_name, mode='a', header=False, index=False)    #Writing the df to a csv file
+                df.to_csv(storage_file, mode='a', header=False, index=False)
+
+                quit2 = input("To quit enter 'q'. To continue press any key ")
                 if quit2 == "q":
                     quit1 = True
             
         elif menuInput == 3:
             print("option3")
+            #Auto delete expired food from data.
+            #Allow user to individually remove an item
             quitMainLoop = True
         elif menuInput == 4:
-            expiringFood = readData(file_name)
+            #shows food expiring soon
+            test = readData(storage_file)
+            subset = test['Exp Date']
+            print(subset)
             quitMainLoop = True
         elif menuInput == 5:
+            #Money lost to food expiring
             print("option3")
             quitMainLoop = True
         else:
             print("Enter valid input")
-        
 
-
-    
+"""Encorporate feature that reminds user daily of food that will expire soon
+Goal is to reduce food wasted & know how much money you are wasting"""
