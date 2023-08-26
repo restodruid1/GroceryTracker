@@ -21,44 +21,61 @@ def menu():
     print("Option 4: Show food expiring soon")
     print("Option 5: TBD")
 
+def readData(readFile):
+    with open(readFile, "r") as file:
+        # Read data from a file
+        
+        csvreader = csv.reader(file)
+        for row in csvreader:
+            print(row)
+
+def writeData(writeFile, itemInformation):
+    with open(writeFile, "a") as file:
+        # Write data to the file
+        
+        writer = csv.writer(file)
+        writer.writerow(itemInformation)
+
 
 
 
 if __name__ == "__main__":
     
-    foodDictionary1 = []
+    file_name = "my_food_file.csv"
+    storage_file = "GroceryTrackerStorage.csv"
     currentdate = currentDate()
     quit1 = False
     quitMainLoop = False
     
     while quitMainLoop == False:
         menu()
-        menuInput = int(input("Enter a number(1, 2, 3, 4, 5)"))
+        menuInput = int(input("Enter a number(1, 2, 3, 4, 5)\n"))
         if menuInput == 1:
-            print("print out entire food inventory")
+            print(readData(storage_file))
         elif menuInput == 2:    
-            while quit1 == False:
+            while quit1 == False:                                   #loop to allow user to input multiple items
                 foodInput = input("Enter the name of the food ")
                 monthInput = input("Enter the month of expiration ")
                 dayInput = input("Enter day of expiration ")
                 yearInput = input("Enter the year of expiration ")
                 costOfFood = input("Enter the cost of the food(do not add dollar sign) ")
-                costOfFood = f"${costOfFood}"
                 
-                expirationDate = f"{dayInput}-{monthInput}-{yearInput}"
-                print(expirationDate)
-                dict1 = {'log date': currentdate ,'item': foodInput, 'cost': costOfFood,'exp date' : expirationDate}    #Bundle user input into a dictionary
-                foodDictionary1.append(dict1)   #Add the new dictionary to the original food list of dictionaries
+                costOfFood = f"${costOfFood}"                           #formatting cost with $ sign      
+                expirationDate = f"{monthInput}-{dayInput}-{yearInput}"         #Creating expiration date for the food dictionary
+                foodList = [currentdate, foodInput, costOfFood, expirationDate]
+                
+                writeData(storage_file, foodList)                #Writing data to file "GroceryTrackerStorage.csv"
+                writeData(file_name, foodList)                   #Writing data to file "my_food_file.csv"
                 
                 quit2 = input("To quit enter 'q'. To continue press any key")
                 if quit2 == "q":
                     quit1 = True
-            quitMainLoop = True
+            
         elif menuInput == 3:
             print("option3")
             quitMainLoop = True
         elif menuInput == 4:
-            print("option4")
+            expiringFood = readData(file_name)
             quitMainLoop = True
         elif menuInput == 5:
             print("option3")
@@ -68,24 +85,4 @@ if __name__ == "__main__":
         
 
 
-    print(foodDictionary1)
-
-    fieldNames = foodDictionary1[0].keys()  #Creating column names for the CSV file
-    file_name = "my_food_file.csv"
-    storage_file = "GroceryTrackerStorage.csv"
-
-    # Open the file in write mode (this will create a new file if it doesn't exist)
-    with open(storage_file, "a") as file:
-        # Write data to the file
-        
-        writer = csv.DictWriter(file, fieldnames=fieldNames)
-        writer.writeheader()
-        writer.writerows(foodDictionary1)
-
-    # Open the file in write mode (this will create a new file if it doesn't exist)
-    with open(file_name, "a") as file:
-        # Write data to the file
-        
-        writer = csv.DictWriter(file, fieldnames=fieldNames)
-        writer.writeheader()
-        writer.writerows(foodDictionary1)
+    
