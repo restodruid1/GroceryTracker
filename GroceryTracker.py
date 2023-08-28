@@ -57,21 +57,12 @@ if __name__ == "__main__":
                 foodList = [[currentdate, foodInput, costOfFood, expirationDate,]]  #Organizing data for a panda df
                 
                 df = pandas.DataFrame(foodList, columns=['Log Date', 'Food Item', 'Cost', 'Exp Date'])  #storing food data in a panda df
-                
-                """if counter == 0:                                                #If its the first input of the day, it creates a new df entry
-                    df.to_csv(file_name,mode='a', index=False)
-                    df.to_csv(storage_file,mode='a', index=False)
-                    counter += 1
-                else:
-                    df.to_csv(file_name, mode='a', header=False, index=False)    #If its not the first input of the day, it adds to the df entry
-                    df.to_csv(storage_file, mode='a', header=False, index=False) """  
-
                 df.to_csv(file_name, mode='a', header=False, index=False)    #Writing the df to a csv file
                 df.to_csv(storage_file, mode='a', header=False, index=False)
 
                 quit2 = input("To quit enter 'q'. To continue press any key ")
                 if quit2 == "q":
-                    quit1 = True
+                    break
             
         elif menuInput == 3:
             print("option3")
