@@ -13,6 +13,15 @@ from pandas import DataFrame
 def currentDate():
     current_date = datetime.now().strftime("%m-%d-%Y")
     return current_date 
+def currentMonth():
+    current_date = datetime.now().strftime("%m")
+    return current_date 
+def currentDay():
+    current_date = datetime.now().strftime("%d")
+    return current_date 
+def currentYear():
+    current_date = datetime.now().strftime("%Y")
+    return current_date 
 
 def menu():
     print("          Menu          ")
@@ -56,7 +65,7 @@ if __name__ == "__main__":
                 expirationDate = f"{monthInput}-{dayInput}-{yearInput}"         #Creating expiration date for the food dictionary
                 foodList = [[currentdate, foodInput, costOfFood, expirationDate,]]  #Organizing data for a panda df
                 
-                df = pandas.DataFrame(foodList, columns=['Log Date', 'Food Item', 'Cost', 'Exp Date'])  #storing food data in a panda df
+                df = pandas.DataFrame(foodList, columns=['Log Date', 'Food', 'Cost', 'Exp Date'])  #storing food data in a panda df
                 df.to_csv(file_name, mode='a', header=False, index=False)    #Writing the df to a csv file
                 df.to_csv(storage_file, mode='a', header=False, index=False)
 
@@ -69,15 +78,36 @@ if __name__ == "__main__":
             #Auto delete expired food from data.
             #Allow user to individually remove an item
             quitMainLoop = True
-        elif menuInput == 4:
+        elif menuInput == 4:        #INCORPORATE TEXT MESSAGE FEATURE
             #shows food expiring soon
             test = readData(storage_file)
-            subset = test['Exp Date']
-            print(subset)
-            quitMainLoop = True
+            subsetDate = test['Exp Date']       #Storing the Exp date column in a variable
+            subsetFood = test['Food']           #Storing the Food column in a variable
+            expiringSoon = []
+            index = 0                           #Tracking the loop iteration for later use
+            for date in subsetDate:
+                expMonth = date[0:2]            #Separate the expiration into months, days, year
+                expDay = date[3:5]
+                expYear = int(date[6:])         #Store the expiration year 
+                if expMonth[0] == "0":
+                    expMonth = expMonth[1]      #If user data in format "09", change it to "9"
+                if expDay[0] == "0":
+                    expDay = expDay[1]
+                
+                if expYear >= int(currentYear()) and int(expMonth) >= int(currentMonth()) and (int(expDay) >= int(currentDay()) and int(expDay) < int(currentDay()) + 5):      
+                    expiringSoon.append(subsetFood[index])
+                   #if the expiration date is within 5 days of expiring, store the associated food in a list
+                    
+                index += 1     
+                           
+            for item in expiringSoon:
+                print(f"{item} is expiring within 5 days!")     #Print the item expiring soon 
+            
         elif menuInput == 5:
             #Money lost to food expiring
             print("option3")
+            var = int(input())
+            print(var)
             quitMainLoop = True
         else:
             print("Enter valid input")
