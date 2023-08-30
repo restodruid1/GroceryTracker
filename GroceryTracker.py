@@ -28,9 +28,11 @@ def menu():
     print("__________________________")
     print("Option 1: Print log of food")
     print("Option 2: Add new item")
-    print("Option 3: Delete item")
+    print("Option 3: Delete expired items")
     print("Option 4: Show food expiring soon")
-    print("Option 5: TBD")
+    print("Option 5: Delete an item")
+    print("Option 6: Show money lost to expired food")
+    print("Option 7: Quit")
 
 def readData(fileName):
         # Read data from a file
@@ -52,7 +54,7 @@ def parseFileData():
         if expDay[0] == "0":
             expDay = expDay[1]
                 
-        if expYear >= int(currentYear()) and int(expMonth) >= int(currentMonth()) and (int(expDay) >= int(currentDay()) and int(expDay) < int(currentDay()) + 5):      
+        if expYear == int(currentYear()) and int(expMonth) == int(currentMonth()) and (int(expDay) >= int(currentDay()) and int(expDay) < int(currentDay()) + 5):      
             expiringSoon.append(subsetFood[index])
             #if the expiration date is within 5 days of expiring, store the associated food in a list
                     
@@ -83,7 +85,63 @@ def foodToDataFrame():
     df.to_csv(file_name, mode='a', header=False, index=False)    #Writing the df to a csv file
     df.to_csv(storage_file, mode='a', header=False, index=False)
 
+def deleteDataFromFile():
+    dataFile = readData(file_name)
+    subsetDate = dataFile['Exp Date']       #Storing the Exp date column in a variable
+    subsetFood = dataFile['Food']           #Storing the Food column in a variable
+    expiredFood = []
+    expiredDate = []
+    index = 0                           #Tracking the loop iteration for later use
+    for date in subsetDate:
+        expMonth = date[0:2]            #Separate the expiration into months, days, year
+        expDay = date[3:5]
+        expYear = int(date[6:])         #Store the expiration year 
+        if expMonth[0] == "0":
+            expMonth = expMonth[1]      #If user data in format "09", change it to "9"
+        if expDay[0] == "0":
+            expDay = expDay[1]
 
+        #if the food is expired, store the associated food in a list        
+        if expYear < int(currentYear()):
+            expiredFood.append(subsetFood[index])
+            expiredDate.append(subsetDate[index])
+        if expYear == int(currentYear()) and int(expMonth) < int(currentMonth()):
+            expiredFood.append(subsetFood[index])
+            expiredDate.append(subsetDate[index])
+        if expYear == int(currentYear()) and int(expMonth) == int(currentMonth()) and int(expDay) < int(currentDay()):
+            expiredFood.append(subsetFood[index])
+            expiredDate.append(subsetDate[index])
+       
+           
+                    
+        index += 1
+    
+    
+                             
+    for item in expiredFood:
+        print(f"{item} is expired!")                                #Print the item expiring soon
+    ans = input("Would you like to delete expired items?(yes or no) ")
+    
+    if ans == "yes":
+        dataFile2 = pandas.read_csv(file_name)
+        print(dataFile2)
+        
+        for date in expiredDate:
+            dataFile2.drop(dataFile2[dataFile2['Exp Date'] == date].index,inplace=True) #Delete expired item from the data
+        
+        print(dataFile2)      
+        dataFile2.to_csv(file_name, mode='w',header=True , index=False)   #Overwrite my_food_file.csv without the expired food
+    else:
+        print("Items not deleted") 
+    
+
+def deleteIndividualItem(name, date):
+    dataFile3 = pandas.read_csv(file_name)      #Create df based on my_food_file.csv
+    
+    dataFile3.drop(dataFile3[(dataFile3['Exp Date'] == date) & (dataFile3['Food'] == name)].index, inplace=True)    #Delete user specified food item
+    dataFile3.to_csv(file_name, mode='w',header=True , index=False) #Overwrite my_food_file.csv with updated data
+        
+    
 if __name__ == "__main__":
     
     file_name = "my_food_file.csv"
@@ -92,12 +150,16 @@ if __name__ == "__main__":
     quit1 = False
     quitMainLoop = False
     
+    
     while quitMainLoop == False:
         menu()
-        menuInput = int(input("Enter a number(1, 2, 3, 4, 5)\n"))
+        menuInput = int(input("Enter a number(1, 2, 3, 4, 5, 6, 7)\n"))
         if menuInput == 1:
             #Try/catch block for when file is accessed with no data stored
+            print("\nEvery Item Tracked:")
             print(readData(storage_file))
+            print("\nCurrent Inventory:")
+            print(readData(file_name))
         elif menuInput == 2:   
             while quit1 == False:    #loop to allow user to input multiple items
                 foodToDataFrame()    #Take user input for food item and store it in a pandas dataframe in a csv file
@@ -106,22 +168,26 @@ if __name__ == "__main__":
                     break
             
         elif menuInput == 3:
-            print("option3")
             #Auto delete expired food from data.
-            #Allow user to individually remove an item
-            quitMainLoop = True
-        
+            deleteDataFromFile()    #Delete expired food from my_food_file.csv
+            
         elif menuInput == 4: #INCORPORATE TEXT MESSAGE FEATURE
             parseFileData() #shows food expiring soon from my_food_file.csv
         
-        elif menuInput == 5:
-            #Money lost to food expiring
-            print("option3")
-            var = int(input())
-            print(var)
-            quitMainLoop = True
+        elif menuInput == 5: #Delete individual item
+            food = input("Name of item you wish to delete ")
+            date = input("Expiration Date of item you wish to delete(mm-dd-yyyy) ")
+            deleteIndividualItem(food, date)    #Delete individual item from my_food_file.csv
+    
+        elif menuInput == 6:
+            print("Money lost to expired food")
+
+        elif menuInput == 7:
+            #QUIT
+            break
+
         else:
             print("Enter valid input")
 
-"""Encorporate feature that reminds user daily of food that will expire soon
+"""Incorporate feature that reminds user daily of food that will expire soon
 Goal is to reduce food wasted & know how much money you are wasting"""
