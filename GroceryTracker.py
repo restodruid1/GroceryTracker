@@ -61,6 +61,10 @@ def parseFileData():
         index += 1                           
     for item in expiringSoon:
         print(f"{item} is expiring within 5 days!")     #Print the item expiring soon 
+    
+    lengthExpiringSoon = len(expiringSoon)
+    if lengthExpiringSoon == 0:
+        print("There are no items expiring soon")
 
 
 def foodToDataFrame():
@@ -88,9 +92,11 @@ def foodToDataFrame():
 def deleteDataFromFile():
     dataFile = readData(file_name)
     subsetDate = dataFile['Exp Date']       #Storing the Exp date column in a variable
-    subsetFood = dataFile['Food']           #Storing the Food column in a variable
+    subsetFood = dataFile['Food']            #Storing the Food column in a variable
+    subsetCost = dataFile['Cost']          
     expiredFood = []
     expiredDate = []
+    expiredCost = []
     index = 0                           #Tracking the loop iteration for later use
     for date in subsetDate:
         expMonth = date[0:2]            #Separate the expiration into months, days, year
@@ -105,25 +111,30 @@ def deleteDataFromFile():
         if expYear < int(currentYear()):
             expiredFood.append(subsetFood[index])
             expiredDate.append(subsetDate[index])
+            expiredCost.append(subsetCost[index])
         if expYear == int(currentYear()) and int(expMonth) < int(currentMonth()):
             expiredFood.append(subsetFood[index])
             expiredDate.append(subsetDate[index])
+            expiredCost.append(subsetCost[index])
         if expYear == int(currentYear()) and int(expMonth) == int(currentMonth()) and int(expDay) < int(currentDay()):
             expiredFood.append(subsetFood[index])
             expiredDate.append(subsetDate[index])
-       
-           
-                    
+            expiredCost.append(subsetCost[index])
+                      
         index += 1
     
     
                              
     for item in expiredFood:
-        print(f"{item} is expired!")                                #Print the item expiring soon
-    ans = input("Would you like to delete expired items?(yes or no) ")
+        print(f"{item} is expired!")        #Print the expired items
+    if len(expiredFood) == 0:               #Check if there is expired food
+        print("No items are expired")
+        ans = "no"
+    else:
+        ans = input("Would you like to delete expired items?(yes or no) ")      
     
     if ans == "yes":
-        dataFile2 = pandas.read_csv(file_name)
+        dataFile2 = pandas.read_csv(file_name)  #Creat a dataframe
         print(dataFile2)
         
         for date in expiredDate:
@@ -131,9 +142,40 @@ def deleteDataFromFile():
         
         print(dataFile2)      
         dataFile2.to_csv(file_name, mode='w',header=True , index=False)   #Overwrite my_food_file.csv without the expired food
+        return expiredCost
+            
     else:
-        print("Items not deleted") 
+        print("No items were deleted")
+        expiredCost = []    
+        return expiredCost #Returning an empty list so the main function
     
+
+def writeCostToFile(money):
+    total = 0
+    check = len(money)  
+    if check == 0:      #If no expired food is found, check will be 0
+        print("")
+    else:
+        for item in money:
+            item = item.strip('$') 
+            item = int(item)
+            total += item
+        print(f"${total} lost to expired food")
+        with open(cost_File, mode="a", newline='') as file: #Write money lost to expired food into a file
+            writer = csv.writer(file)
+            writer.writerow([total])
+
+
+def readCostFromFile(file):
+    with open(cost_File, mode='r', newline='') as file:
+        reader = csv.reader(file)
+        total = 0
+        for row in reader:
+            for number in row:          #For each line and item in csv file, add the integer total
+                print(number)
+                number = int(number)    #Turn string into integer
+                total += number
+        print(f"Total amount of money lost to expired groceries ${total}")  
 
 def deleteIndividualItem(name, date):
     dataFile3 = pandas.read_csv(file_name)      #Create df based on my_food_file.csv
@@ -146,6 +188,7 @@ if __name__ == "__main__":
     
     file_name = "my_food_file.csv"
     storage_file = "GroceryTrackerStorage.csv"
+    cost_File = "ExpiredCostTracker.csv"
     currentdate = currentDate()
     quit1 = False
     quitMainLoop = False
@@ -169,7 +212,8 @@ if __name__ == "__main__":
             
         elif menuInput == 3:
             #Auto delete expired food from data.
-            deleteDataFromFile()    #Delete expired food from my_food_file.csv
+            expired = deleteDataFromFile()    #Delete expired food from my_food_file.csv
+            writeCostToFile(expired)          #Write money lost to expired food to ExpireCostTracker.csv
             
         elif menuInput == 4: #INCORPORATE TEXT MESSAGE FEATURE
             parseFileData() #shows food expiring soon from my_food_file.csv
@@ -180,7 +224,7 @@ if __name__ == "__main__":
             deleteIndividualItem(food, date)    #Delete individual item from my_food_file.csv
     
         elif menuInput == 6:
-            print("Money lost to expired food")
+            readCostFromFile(cost_File)
 
         elif menuInput == 7:
             #QUIT
