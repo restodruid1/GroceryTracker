@@ -172,7 +172,7 @@ def readCostFromFile(file):
         total = 0
         for row in reader:
             for number in row:          #For each line and item in csv file, add the integer total
-                print(number)
+                #print(number)
                 number = int(number)    #Turn string into integer
                 total += number
         print(f"Total amount of money lost to expired groceries ${total}")  
