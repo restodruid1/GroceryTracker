@@ -69,10 +69,10 @@ def parseFileData():
 
 def foodToDataFrame():
     foodInput = input("Enter the name of the food ")
-    monthInput = input("Enter the month of expiration ")
-    dayInput = input("Enter day of expiration ")
-    yearInput = input("Enter the year of expiration ")
-    costOfFood = input("Enter the cost of the food(do not add dollar sign) ")
+    monthInput = input("Enter the month of expiration(mm) ")
+    dayInput = input("Enter day of expiration(dd) ")
+    yearInput = input("Enter the year of expiration(yyyy) ")
+    costOfFood = input("Enter the cost of the food(ex inp = 15) ")
                 
     costOfFood = f"${costOfFood}"                           #formatting cost with $ sign      
     expirationDate = f"{monthInput}-{dayInput}-{yearInput}"         #Creating expiration date for the food dictionary
